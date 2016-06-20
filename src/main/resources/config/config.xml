@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>  
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="site-conf.xsd">
+
+
+<request-map uri="">
+	<service name="" method=""></service>
+	<service name="" method=""></service>
+	<service name="" method=""></service>
+	<response name="success" type="none"></response>
+</request-map>
+
+</site-conf>

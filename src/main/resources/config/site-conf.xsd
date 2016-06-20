@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xs:element name="site-conf">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element minOccurs="0" maxOccurs="unbounded" ref="include"/>
+			  	<xs:element minOccurs="0" maxOccurs="unbounded" ref="request-map"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+    
+     <xs:element name="include">
+    	<xs:annotation>
+    		<xs:documentation>
+    			This includes all elements of the xml file references.
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:complexType>
+    		<xs:attributeGroup ref="attlist.include"/>
+    	</xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.include">
+    	<xs:attribute name="location" type="xs:string" use="required"></xs:attribute>
+    </xs:attributeGroup>
+    
+   <xs:element name="request-map">
+    	<xs:annotation>
+    		<xs:documentation>
+    			  Place where are defined the elements of a request.
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:complexType>
+    		 <xs:sequence>
+    		 	<xs:element minOccurs="0"  maxOccurs="unbounded" ref="service" />
+    		 	 <xs:element minOccurs="0"  maxOccurs="unbounded" ref="response"  /> 
+    		 </xs:sequence>  
+    		 <xs:attributeGroup ref="attlist.request-map" />
+    	</xs:complexType>
+    </xs:element>
+    
+    <xs:attributeGroup name="attlist.request-map">
+    	<xs:attribute name="uri" type="xs:string" use="required" />
+    	<xs:attribute name="token" default="false" type="xs:boolean" />
+    	<xs:attribute name="auth" default="true" type="xs:boolean" />
+    </xs:attributeGroup>
+    
+    
+    <xs:element name="service">
+    	<xs:annotation>
+    		<xs:documentation>
+    			  request parameter
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:element minOccurs="0"  maxOccurs="unbounded" ref="parameter" />
+    		</xs:sequence> 
+    		<xs:attributeGroup ref="attlist.service" />
+    	</xs:complexType>
+    </xs:element>
+    
+    <xs:attributeGroup name="attlist.service">
+    	<xs:attribute name="name" use="required" type="xs:string" />
+    	<xs:attribute name="method" use="required" type="xs:string" />
+    	<xs:attribute name="method" use="required" type="xs:string" />
+    	<xs:attribute name="timeout" type="xs:int" default="0" />
+    	<xs:attribute name="mode"   default="sync">
+    		<xs:simpleType>
+    			<xs:restriction base="xs:token">
+    				<xs:enumeration value="sync" />
+    				<xs:enumeration value="async" />
+    			</xs:restriction>
+    		</xs:simpleType>
+    	</xs:attribute>
+    </xs:attributeGroup>
+    
+    
+    <xs:element name="parameter">
+    	<xs:annotation>
+    		<xs:documentation>
+    			  request parameter
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:complexType>
+    		<xs:attributeGroup ref="attlist.parameter"/>
+    	</xs:complexType>
+    </xs:element>
+    
+    <xs:attributeGroup name="attlist.parameter">
+    	<xs:attribute name="name" use="required" type="xs:string" />
+    	<xs:attribute name="type" use="required" type="xs:string" />
+    	<xs:attribute name="mode" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="IN"/>
+                    <xs:enumeration value="OUT"/>
+                    <xs:enumeration value="INOUT"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="optional" default="false">
+            <xs:simpleType>
+                <xs:restriction base="xs:token">
+                    <xs:enumeration value="true"/>
+                    <xs:enumeration value="false"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    
+    </xs:attributeGroup>
+    
+    <xs:element name="response">
+    	<xs:annotation>
+    		<xs:documentation>
+    			response info
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:complexType>
+    		<xs:sequence>
+    			 <xs:element minOccurs="0" maxOccurs="unbounded" ref="redirect-parameter"/>
+    		</xs:sequence>
+    		<xs:attributeGroup ref="attlist.response" />
+    	</xs:complexType>
+    </xs:element>
+    
+    <xs:attributeGroup name="attlist.response">
+   		<xs:attribute name="name" use="required">
+   			<xs:simpleType>
+   				<xs:restriction base="xs:token">
+   					<xs:enumeration value="success"></xs:enumeration>
+   					<xs:enumeration value="error"></xs:enumeration>
+   				</xs:restriction>
+   			</xs:simpleType>
+   		</xs:attribute>
+   	 	<xs:attribute name="type" use="required">
+   	 		<xs:simpleType>
+   	 			<xs:restriction base="xs:token">
+   	 			
+   	 				<xs:enumeration value="none">
+   	 					<xs:annotation><xs:documentation>no result</xs:documentation></xs:annotation>
+   	 				</xs:enumeration>
+   	 				<xs:enumeration value="view">
+   	 					<xs:annotation><xs:documentation>return view</xs:documentation></xs:annotation>
+   	 				</xs:enumeration>
+   	 				<xs:enumeration value="json">
+   	 					<xs:annotation><xs:documentation> return json </xs:documentation></xs:annotation>
+   	 				</xs:enumeration>
+   	 				<xs:enumeration value="redirect">
+   	 					<xs:annotation><xs:documentation> redirect request parameters </xs:documentation></xs:annotation>
+   	 				</xs:enumeration>
+   	 				<xs:enumeration value="redirect-noparam">
+   	 					<xs:annotation><xs:documentation>redirect No request parameters </xs:documentation></xs:annotation>
+   	 				</xs:enumeration>
+   	 			</xs:restriction>
+   	 		</xs:simpleType>
+   	 	</xs:attribute>
+   	 	<xs:attribute name="value" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Depending on the type of response, will either
+                    be the view or request name (ie view-map-name or request-map URI).
+                    Can be an URL.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+     <xs:element name="redirect-parameter">
+    	<xs:annotation>
+    		<xs:documentation>
+    			redirect-parameter defined
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:complexType>
+    		<xs:attributeGroup ref="attlist.redirect-parameter"/>
+    	</xs:complexType>
+    </xs:element> 
+	<xs:attributeGroup name="attlist.redirect-parameter">
+		 <xs:attribute type="xs:string" name="name" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    Name of the parameter to redirect
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="from" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    If specified used instead of the value of name for the key to find
+                    a request attribute or parameter.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="value" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Set a string value to the parameter.
+                </xs:documentation>
+            </xs:annotation>
+            
+        </xs:attribute>
+	
+	</xs:attributeGroup>
+    
+</xs:schema>
