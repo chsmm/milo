@@ -316,7 +316,6 @@ public class UtilXml {
     public static Document readXmlDocument(URL url, boolean validate)
             throws SAXException, ParserConfigurationException, java.io.IOException {
         if (url == null) {
-            //Debug.logWarning("[UtilXml.readXmlDocument] URL was null, doing nothing", module);
             return null;
         }
         InputStream is = url.openStream();
@@ -350,7 +349,6 @@ public class UtilXml {
     public static Document readXmlDocument(InputStream is, boolean validate, String docDescription)
             throws SAXException, ParserConfigurationException, java.io.IOException {
         if (is == null) {
-            //Debug.logWarning("[UtilXml.readXmlDocument] InputStream was null, doing nothing", module);
             return null;
         }
 
@@ -395,7 +393,6 @@ public class UtilXml {
         document = builder.parse(is);
 
         double totalSeconds = (System.currentTimeMillis() - startTime)/1000.0;
-       // if (Debug.verboseOn()) Debug.logVerbose("XML Read " + totalSeconds + "s: " + docDescription, module);
         return document;
     }
 

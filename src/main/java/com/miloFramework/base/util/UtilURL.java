@@ -159,14 +159,12 @@ public class UtilURL {
                 buf.append(System.getProperty("line.separator"));
             }
         } catch (IOException e) {
-           // Debug.logError(e, "Error reading text from URL [" + url + "]: " + e.toString(), module);
             throw e;
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    //Debug.logError(e, "Error closing after reading text from URL [" + url + "]: " + e.toString(), module);
                 }
             }
         }
