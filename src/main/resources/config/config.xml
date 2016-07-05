@@ -9,7 +9,10 @@
 	<parameter name="" type="" mode="IN"/>
 	
 	</service>
-	<response name="success" type="none"></response>
+	<response name="success" type="none">
+		<redirect-parameter name="" />
+	
+	</response>
 </request-map>
 
 </site-conf>

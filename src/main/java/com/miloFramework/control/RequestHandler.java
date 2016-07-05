@@ -7,7 +7,13 @@ import javax.servlet.ServletContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.miloFramework.control.ConfigXMLReader.ControllerConfig;
+import com.miloFramework.control.ConfigXMLReader.RequestMap;
+import com.miloFramework.service.ServiceContext;
+import com.miloFramework.service.ServiceDispatcher;
+
 public class RequestHandler {
+	
 	public static final String module = RequestHandler.class.getName();
 	  
 	  
@@ -24,12 +30,15 @@ public class RequestHandler {
 	  
 	protected ServletContext servletContext = null;
 	protected URL controllerConfigURL = null;
-	protected WebApplicationContext webApplicationContext;
+	protected ServiceDispatcher serviceDispatcher;
 	  
 	public void init(ServletContext servletContext) {
         this.servletContext = servletContext;
-        this.webApplicationContext =  ContextLoader.getCurrentWebApplicationContext(); 
         this.controllerConfigURL = ConfigXMLReader.getControllerConfigURL(servletContext);
-	    //ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+        ControllerConfig controllerConfig =  ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+	    for (RequestMap requestMap : controllerConfig.requestMapMap.values()) {
+	    	ServiceContext.getServiceContext().register(requestMap.uri,requestMap.serviceMaps);
+		}
+	    serviceDispatcher = ServiceDispatcher.getServiceDispatcher();
 	}
 }

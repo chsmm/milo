@@ -95,7 +95,7 @@
                 <xs:restriction base="xs:token">
                     <xs:enumeration value="IN"/>
                     <xs:enumeration value="OUT"/>
-                    <xs:enumeration value="INOUT"/>
+                    <xs:enumeration value="OUTIN"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
