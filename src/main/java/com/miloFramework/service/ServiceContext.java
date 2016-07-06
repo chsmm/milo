@@ -1,13 +1,10 @@
 package com.miloFramework.service;
 
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-
-import javolution.util.FastMap;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,46 +15,16 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import com.miloFramework.base.util.ObjectType;
 import com.miloFramework.control.ConfigXMLReader.Parameter;
 import com.miloFramework.control.ConfigXMLReader.ServiceMap;
 
 public class ServiceContext {
 	
 	
-	
-	private static final Map<String, Class<?>> primitiveMap = FastMap.newInstance();
-	
-	
-    {
-
-    	registered("long",long.class);
-    	registered("boolean", boolean.class);
-    	registered("char", char.class);
-    	registered("int",int.class);
-    	registered("double",double.class);
-    	registered("float",float.class);
-    	registered("byte", byte.class);
-    	registered("short", short.class);	   
-    	registered("Integer",Integer.class);
-    	registered("Float",Float.class);
-    	registered("Double",Double.class);
-    	registered("character",Character.class);
-    	registered("Long",Long.class);
-    	registered("Boolean",Boolean.class);
-    	registered("Byte", Byte.class);
-    	registered("Short", Short.class);
-    	registered("date",Date.class);
-    	registered("string",String.class);
-    	registered("object",Object.class);
-    }
-    
-    private static void registered(String className,Class<?> clazz){
-    	primitiveMap.put(className, clazz);
-    }
-	
     private ClassLoader loader;
     
-    
+    private ConcurrentMap<String, Object> services = Maps.newConcurrentMap();
     private ConcurrentMap<String, List<ServiceMap>> serviceMaps = Maps.newConcurrentMap();
 	
 	private ConcurrentMap<String, MethodAccess> serviceMethodAccessMap = Maps.newConcurrentMap();
@@ -94,6 +61,10 @@ public class ServiceContext {
     	return this.serviceMaps.containsKey(uri) ? new ServiceExecuteChain(this, this.serviceMaps.get(uri)): null;
     }
     
+    
+    public Object getService(String service){
+    	return services.get(service);
+    }
   
     public MethodAccess getServiceMethodAccess(String service){
     	return serviceMethodAccessMap.get(service);
@@ -121,6 +92,7 @@ public class ServiceContext {
     
     protected void register(ServiceMap serviceMap) {
     	if(serviceMap==null) return ;
+    	
     	MethodAccess serviceMethodAccess =serviceMethodAccessMap.get(serviceMap.name) ;
     	if(serviceMethodAccess==null){
 	    	Object serviceObject = webApplicationContext.getBean(serviceMap.name);
@@ -128,6 +100,7 @@ public class ServiceContext {
 	    		System.out.println(serviceMap.name + " service not found ");
 	    		return;
 	    	}
+	    	services.putIfAbsent(serviceMap.name, serviceObject);
 	    	serviceMethodAccess = MethodAccess.get(serviceObject.getClass());
 	    	serviceMethodAccessMap.putIfAbsent(serviceMap.name, serviceMethodAccess);
     	}
@@ -139,9 +112,9 @@ public class ServiceContext {
     	    // load the class
     		List<Class<?>> parameterTypes = new LinkedList<Class<?>>();
     		Class<?> parameterType=null;
-    		Map<Class<?>, String> parameterTypeMap = new LinkedHashMap<Class<?>, String>();
+    		Map<Class<?>, String> parameterTypeNameMap = new LinkedHashMap<Class<?>, String>();
     		for (Parameter parameter : parameters) {
-    			parameterType = primitiveMap.get(parameter.type);
+    			parameterType = ObjectType.getPrimitive(parameter.type);
     			if(parameterType != null){
 		            try {
 		            	parameterType = loader.loadClass(parameter.type);
@@ -154,7 +127,7 @@ public class ServiceContext {
 	            }
     			if(ObjectUtils.equals(parameter.mode,"IN")){
     				 parameterTypes.add(parameterType);
-    				 parameterTypeMap.put(parameterType, parameter.name);
+    				 parameterTypeNameMap.put(parameterType, parameter.name);
     			}else{
     				if(serviceMethodReturnMap.get(serviceMap.name, serviceMap.method)!=null)throw new RuntimeException("The service "+serviceMap.name+" "+serviceMap.method+" method with multiple return parameter");
     				serviceMethodReturnMap.put(serviceMap.name, serviceMap.method, new ReturnMetaData(parameterType,parameter.name,parameter.mode));
@@ -163,7 +136,7 @@ public class ServiceContext {
 			}
     		Class<?>[] classs = parameterTypes.toArray(new Class<?>[0]);
     		int index = serviceMethodAccess.getIndex(serviceMap.method, classs);
-    		serviceMethodParameterMap.put(serviceMap.name, serviceMap.method, new ParameterMetaData(index, classs,parameterTypeMap, serviceMap.mode, serviceMap.timeout));
+    		serviceMethodParameterMap.put(serviceMap.name, serviceMap.method, new ParameterMetaData(index, classs,parameterTypeNameMap, serviceMap.mode, serviceMap.timeout));
     	}
     	
     }
@@ -171,14 +144,14 @@ public class ServiceContext {
     public static class ParameterMetaData{
     	public int index;
     	public Class<?>[] parameterTypes;
-    	public Map<Class<?>, String> parameterTypeMap;
+    	public Map<Class<?>, String> parameterTypeNameMap;
     	public String mode;
     	public Integer timeout;
     	
-    	public ParameterMetaData(int index,Class<?>[] parameterTypes,Map<Class<?>, String> parameterTypeMap,String mode,Integer timeout) {
+    	public ParameterMetaData(int index,Class<?>[] parameterTypes,Map<Class<?>, String> parameterTypeNameMap,String mode,Integer timeout) {
     		this.index = index;
     		this.parameterTypes = parameterTypes;
-    		this.parameterTypeMap = parameterTypeMap;
+    		this.parameterTypeNameMap = parameterTypeNameMap;
     		this.mode = mode;
     		this.timeout = timeout;
 		}

@@ -18,13 +18,13 @@ public class ContextFilter implements Filter{
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		
+		RequestHandler.getRequestHandler(config.getServletContext());
 	}
 	
 	
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,FilterChain filterChain) throws IOException, ServletException {
-	
+		filterChain.doFilter(servletRequest, servletResponse);
 	}
 	
 	

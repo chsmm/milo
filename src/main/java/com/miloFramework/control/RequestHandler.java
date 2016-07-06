@@ -1,16 +1,22 @@
 package com.miloFramework.control;
 
 import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.WebUtils;
 
 import com.miloFramework.control.ConfigXMLReader.ControllerConfig;
 import com.miloFramework.control.ConfigXMLReader.RequestMap;
 import com.miloFramework.service.ServiceContext;
 import com.miloFramework.service.ServiceDispatcher;
+import com.miloFramework.service.ServiceExecuteChain;
 
 public class RequestHandler {
 	
@@ -30,15 +36,34 @@ public class RequestHandler {
 	  
 	protected ServletContext servletContext = null;
 	protected URL controllerConfigURL = null;
+	ControllerConfig controllerConfig = null;
 	protected ServiceDispatcher serviceDispatcher;
 	  
-	public void init(ServletContext servletContext) {
+	protected void init(ServletContext servletContext) {
         this.servletContext = servletContext;
         this.controllerConfigURL = ConfigXMLReader.getControllerConfigURL(servletContext);
-        ControllerConfig controllerConfig =  ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
+        controllerConfig =  ConfigXMLReader.getControllerConfig(this.controllerConfigURL);
 	    for (RequestMap requestMap : controllerConfig.requestMapMap.values()) {
 	    	ServiceContext.getServiceContext().register(requestMap.uri,requestMap.serviceMaps);
 		}
 	    serviceDispatcher = ServiceDispatcher.getServiceDispatcher();
+	}
+	
+	
+	
+	public void doReuqest(String uri,HttpServletRequest request,HttpServletResponse response){
+		
+		ServiceExecuteChain serviceExecuteChain = ServiceContext.getServiceContext().getServiceExecuteChain(uri);
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+		for (String parameterName : request.getParameterMap().keySet()) {
+			params.put(parameterName, WebUtils.findParameterValue(request.getParameterMap(), parameterName));
+		}
+		if(serviceExecuteChain!=null){
+			try {
+				serviceDispatcher.run(serviceExecuteChain, params);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

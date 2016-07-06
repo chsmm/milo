@@ -35,13 +35,14 @@ public class ServiceExecuteChain {
 		} else {
 			currentPosition++;
 			ServiceMap serviceMap = serviceMaps.get(currentPosition - 1);
+			Object service = serviceContext.getService(serviceMap.name);
 			MethodAccess serviceMethodAccess = serviceContext.getServiceMethodAccess(serviceMap.name);
 			ParameterMetaData parameterMetaData = serviceContext.getParameterMetaData(serviceMap.name, serviceMap.method);
 			ReturnMetaData returnMetaData = serviceContext.getReturnMetaData(serviceMap.name, serviceMap.method);
 			if(ObjectUtils.equals(serviceMap.mode, ASYNC_MODE)){
-				dispatcher.runAsync(serviceMethodAccess, parameterMetaData, returnMetaData, params);
+				dispatcher.runAsync(service,serviceMethodAccess, parameterMetaData, returnMetaData, params);
 			}else{
-				dispatcher.runSync(serviceMethodAccess, parameterMetaData, returnMetaData, params);
+				dispatcher.runSync(service,serviceMethodAccess, parameterMetaData, returnMetaData, params);
 			}
 		}
 		
